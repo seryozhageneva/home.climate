@@ -1,3 +1,5 @@
+![Image alt](https://github.com/{seryozhageneva}/{repository}/raw/{branch}/{path}/image.png)
+
 # home.climate
 
 ## About
