@@ -7,7 +7,7 @@ import sqlite3
 from bot.data import create_table, insert_data, data
 from bot.order_db import create_orders_table, insert_order
 
-bot = telebot.TeleBot('6850142538:AAHIpaLYieu-MWQJHeN3s0WvHFK6YWVzGRU')
+bot = telebot.TeleBot('ВАШ КЛЮЧ СЮДА')
 
 
 def update_database():
