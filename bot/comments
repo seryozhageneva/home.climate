@@ -1,0 +1,232 @@
+# имя пользователя
+#@bot.message_handler(commands=['myname'])
+#def myname(message):
+#    bot.send_message(message.chat.id, f'{message.from_user.first_name} {message.from_user.last_name}')
+
+# кнопки у поля ввода
+#@bot.message_handler(commands=['buttons'])
+#def start(message):
+#    markup = types.ReplyKeyboardMarkup()
+#    btn1 = types.KeyboardButton('Помощь')
+#    btn2 = types.KeyboardButton('Площадь')
+#    markup.row(btn1, btn2)
+#    btn3 = types.KeyboardButton('Сайт')
+#    markup.row(btn3)
+#    bot.send_message(message.chat.id, 'Чем я могу быть Вам полезен?', reply_markup=markup)
+#    bot.register_next_step_handler(message, on_click)
+
+# функция, для работы кнопок, которые под полем ввода
+#def on_click(message):
+#   if message.text == 'Сайт':
+#        bot.send_message(message.chat.id, 'https://домашний-климат.рф/')
+#    elif message.text == 'Помощь':
+#        bot.send_message(message.chat.id, 'Нажмите на /help')
+#    elif message.text == 'Площадь':
+#        bot.send_message(message.chat.id, 'Нажмите на /square')
+
+#@bot.callback_query_handler(func=lambda callback: True)
+#def callback_message(callback):
+#    if callback.data == 'help':
+#        bot.send_message(callback.message.chat.id, '/help')
+
+# обработка текста, введенного пользователем
+#@bot.message_handler()
+#def text(message):
+#    if message.text.lower() == 'faq':
+#        bot.send_message(message.chat.id, f'{message.from_user.first_name}')
+#    elif message.text.lower() == 'how are you?':
+#        bot.send_message(message.chat.id, 'im fine, thank you')
+#    elif message.text.lower() == 'id':
+#        # bot.reply_to() - ответ на прошлое сообщение
+#        bot.reply_to(message, f'Your ID: {message.from_user.id}')
+
+# отправка сообщения с кнопками под ним
+#@bot.message_handler(commands=['square'])
+#def square(message):
+#    markup = types.InlineKeyboardMarkup()
+#    markup.add(types.InlineKeyboardButton('до 18 кв.м.', url='https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura-komnaty[%D0%B4%D0%BE%2018%20%D0%BA%D0%B2.%D0%BC.]'))
+#    markup.add(types.InlineKeyboardButton('до 28 кв.м.', url='https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura-komnaty[%D0%B4%D0%BE%2028%20%D0%BA%D0%B2.%D0%BC.]'))
+#    markup.add(types.InlineKeyboardButton('до 38 кв.м.', url='https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura-komnaty[%D0%B4%D0%BE%2038%20%D0%BA%D0%B2.%D0%BC.]'))
+#    markup.add(types.InlineKeyboardButton('до 50 кв.м.', url='https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura-komnaty[%D0%B4%D0%BE%2050%20%D0%BA%D0%B2.%D0%BC.]'))
+#   bot.send_message(message.chat.id, 'Какая площадь помещения?', reply_markup=markup)
+
+links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+# Словарь для хранения выбранных параметров пользователей
+user_params = {}
+
+# Словарь для хранения списка ссылок в зависимости от параметров
+links_dict = {
+    "маленькая_дом_дорого": ['https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura'
+                                          '-komnaty[%D0%B4%D0%BE%2018%20%D0%BA%D0%B2.%D0%BC.', 'https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura'
+                                          '-komnaty[%D0%B4%D0%BE%2018%20%D0%BA%D0%B2.%D0%BC.', 'https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura'
+                                          '-komnaty[%D0%B4%D0%BE%2018%20%D0%BA%D0%B2.%D0%BC.'],
+    "средняя_квартира_дешево": ["Ссылка 4", "Ссылка 5", "Ссылка 6"],
+    # Добавьте дополнительные варианты по мере необходимости
+}
+
+@bot.message_handler(commands=['work'])
+def handle_start(message):
+    # Начало разговора, установка начального состояния
+    user_params[message.chat.id] = {}
+    ask_next_param(message.chat.id)
+
+def ask_next_param(chat_id):
+    # Определяем, какой параметр нужно спросить следующим
+    if 'площадь' not in user_params[chat_id]:
+        param_name = 'площадь'
+    elif 'тип' not in user_params[chat_id]:
+        param_name = 'тип'
+    elif 'цена' not in user_params[chat_id]:
+        param_name = 'цена'
+    else:
+        # Если все параметры уже выбраны, выводим список ссылок
+        send_links(chat_id)
+        return
+
+    # Сохраняем текущий параметр
+    user_params[chat_id]['current_param'] = param_name
+
+    # Отправка вопроса пользователю с вариантами значений и inline-кнопками
+    markup = types.InlineKeyboardMarkup()
+
+    if param_name == "площадь":
+        values = ["Маленькая", "Средняя", "Большая"]
+    elif param_name == "тип":
+        values = ["Квартира", "Дом", "Земля"]
+    elif param_name == "цена":
+        values = ["Дешево", "Средне", "Дорого"]
+    else:
+        values = []
+
+    buttons = [types.InlineKeyboardButton(text=value, callback_data=value) for value in values]
+    markup.add(*buttons)
+    bot.send_message(chat_id, f"Выберите значение для параметра {param_name.lower()}:", reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: 'current_param' in user_params.get(call.message.chat.id, {}))
+def handle_param_value_selection(call):
+    param_name = user_params[call.message.chat.id].get('current_param')
+    selected_value = call.data
+
+    if param_name:
+        user_params[call.message.chat.id][param_name.lower()] = selected_value
+        bot.send_message(call.message.chat.id, f"Значение {param_name.lower()} выбрано: {selected_value}")
+
+    # Задаем следующий вопрос или выводим список ссылок
+    ask_next_param(call.message.chat.id)
+
+def send_links(chat_id):
+    # Получаем параметры
+    square = user_params[chat_id].get('площадь', '')
+    house_type = user_params[chat_id].get('тип', '')
+    price = user_params[chat_id].get('цена', '')
+
+    # Определяем, какой список ссылок выбрать в зависимости от параметров
+    if square == 'Маленькая' and house_type == 'Квартира' and price == 'Дешево':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Маленькая' and house_type == 'Квартира' and price == 'Средне':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Маленькая' and house_type == 'Квартира' and price == 'Дорого':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+    elif square == 'Маленькая' and house_type == 'Дом' and price == 'Дешево':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Маленькая' and house_type == 'Дом' and price == 'Средне':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Маленькая' and house_type == 'Дом' and price == 'Дорого':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+    elif square == 'Маленькая' and house_type == 'Земля' and price == 'Дешево':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Маленькая' and house_type == 'Земля' and price == 'Средне':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Маленькая' and house_type == 'Земля' and price == 'Дорого':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+    elif square == 'Средняя' and house_type == 'Квартира' and price == 'Дешево':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Средняя' and house_type == 'Квартира' and price == 'Средне':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Средняя' and house_type == 'Квартира' and price == 'Дорого':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+    elif square == 'Средняя' and house_type == 'Дом' and price == 'Дешево':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Средняя' and house_type == 'Дом' and price == 'Средне':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Средняя' and house_type == 'Дом' and price == 'Дорого':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+    elif square == 'Средняя' and house_type == 'Земля' and price == 'Дешево':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Средняя' and house_type == 'Земля' and price == 'Средне':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Средняя' and house_type == 'Земля' and price == 'Дорого':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+    elif square == 'Большая' and house_type == 'Квартира' and price == 'Дешево':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Большая' and house_type == 'Квартира' and price == 'Средне':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Большая' and house_type == 'Квартира' and price == 'Дорого':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+    elif square == 'Большая' and house_type == 'Дом' and price == 'Дешево':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Большая' and house_type == 'Дом' and price == 'Средне':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Большая' and house_type == 'Дом' and price == 'Дорого':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+    elif square == 'Большая' and house_type == 'Земля' and price == 'Дешево':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Большая' and house_type == 'Земля' and price == 'Средне':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+    elif square == 'Большая' and house_type == 'Земля' and price == 'Дорого':
+        links = ["Ссылка ", "Ссылка ", "Ссылка "]
+
+    # Добавьте дополнительные условия по мере необходимости
+    else:
+        # Если не удовлетворено ни одно условие, выводим "Ссылка по умолчанию"
+        links = ["Ссылка по умолчанию"]
+
+    # Отправляем сообщение с кнопками-ссылками
+    message = "Вот список ссылок:\n"
+    for i, link in enumerate(links, start=1):
+        message += f"{i}. {link}\n"
+
+    bot.send_message(chat_id, message)
+
+    # Очищаем выбранные параметры
+    del user_params[chat_id]
+
+   # отправка сообщения с кнопками под ним в разных рядах (row)
+#@bot.message_handler(commands=['square'])
+#def square(message):
+#    markup = types.InlineKeyboardMarkup()
+#    btn1 = types.InlineKeyboardButton('до 18 кв.м.',
+#                                      url='https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura'
+#                                          '-komnaty[%D0%B4%D0%BE%2018%20%D0%BA%D0%B2.%D0%BC.]')
+#    btn2 = types.InlineKeyboardButton('до 28 кв.м.',
+#                                      url='https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura'
+#                                          '-komnaty[%D0%B4%D0%BE%2028%20%D0%BA%D0%B2.%D0%BC.]')
+#    btn3 = types.InlineKeyboardButton('до 38 кв.м.',
+#                                      url='https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura'
+#                                          '-komnaty[%D0%B4%D0%BE%2038%20%D0%BA%D0%B2.%D0%BC.]')
+#    btn4 = types.InlineKeyboardButton('до 50 кв.м.',
+#                                      url='https://xn----7sbbnvbfjjehfk1e3d.xn--p1ai/kondicionery?mfp=12-kvadratura'
+#                                          '-komnaty[%D0%B4%D0%BE%2050%20%D0%BA%D0%B2.%D0%BC.]')
+#    markup.row(btn1, btn2)
+#    markup.row(btn3, btn4)
+#    bot.send_message(message.chat.id, 'Какая площадь помещения?', reply_markup=markup)
+
+# реализовать редактирование и обновление рассылки не через код, а через телеграм, чтобы любой камень,
+# которого поставят на роль модератора, легко разобрался с функционалом.
+
+# добавить ссылку на вк по команде vkgroup
+
+# типы
+# @bot.message_handler(content_types[''])
+# text, photo, video (mp4), audio (mp3)
+
+бд: авторизация, покупка, логаут
