@@ -25,5 +25,5 @@
 
 ## Communication with support
 
-[I'm on the github](https://github.com/seryozhageneva)
+[I'm on the github](https://github.com/seryozhageneva)<br />
 [My telegram](https://t.me/yobb9)
