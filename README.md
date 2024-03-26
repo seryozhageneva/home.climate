@@ -29,3 +29,8 @@
 
 [I'm on the github](https://github.com/seryozhageneva)<br />
 [My telegram](https://t.me/yobb9)
+
+## other
+
+lang - python
+db - SQLite
