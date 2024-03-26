@@ -1,4 +1,4 @@
-![Image alt](https://github.com/{seryozhageneva}/{repository}/raw/{branch}/{path}/image.png)
+![Image alt](https://github.com/seryozhageneva/home.climate/blob/main/icon.jpg)
 
 # home.climate
 
